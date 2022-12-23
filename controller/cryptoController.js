@@ -1,8 +1,9 @@
 const Crypto = require("../model/cryptoModel");
+const mongoose = require("mongoose");
 
 const getallCrypto = async (req, res) => {
   try {
-    const model = await Crypto.find().sort({ createdAt: -1 });
+    const model = await Crypto.find({}).sort({ createdAt: -1 });
     res.status(200).json(model);
   } catch (error) {
     res.status(400).json({ error: error.message });
@@ -11,12 +12,17 @@ const getallCrypto = async (req, res) => {
 
 const getsingleCrypto = async (req, res) => {
   const { id } = req.params;
-  try {
-    const model = await Crypto.findById({ _id: id });
-    res.status(200).json(model);
-  } catch (error) {
-    res.status(400).json({ error: error.message });
+
+  if (!mongoose.Types.ObjectId.isValid(id)) {
+    return res.status(404).json({ error: "NO CRYPTO FOUND!" });
   }
+
+  const model = await Crypto.findById({ _id: id });
+
+  if (!model) {
+    return res.status(404).json({ error: "NO CRYPTO FOUND!" });
+  }
+  res.status(200).json(model);
 };
 
 const postCrypto = async (req, res) => {
